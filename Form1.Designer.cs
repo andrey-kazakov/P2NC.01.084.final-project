@@ -124,6 +124,7 @@
             // 
             // requestMethodComboBox
             // 
+            this.requestMethodComboBox.DisplayMember = "0";
             this.requestMethodComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.requestMethodComboBox.FormattingEnabled = true;
             this.requestMethodComboBox.Items.AddRange(new object[] {
@@ -164,6 +165,7 @@
             this.requestPathTextBox.Name = "requestPathTextBox";
             this.requestPathTextBox.Size = new System.Drawing.Size(354, 20);
             this.requestPathTextBox.TabIndex = 3;
+            this.requestPathTextBox.Text = "/";
             // 
             // requestMethodLabel
             // 
@@ -209,6 +211,7 @@
             this.requestRunButton.TabIndex = 8;
             this.requestRunButton.Text = "Run";
             this.requestRunButton.UseVisualStyleBackColor = true;
+            this.requestRunButton.Click += new System.EventHandler(this.requestRunButton_Click);
             // 
             // requestHeadersListBox
             // 
@@ -279,6 +282,7 @@
             // 
             // requestPayloadTextBox
             // 
+            this.requestPayloadTextBox.Enabled = false;
             this.requestPayloadTextBox.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.requestPayloadTextBox.Location = new System.Drawing.Point(7, 207);
             this.requestPayloadTextBox.Multiline = true;
@@ -293,6 +297,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 649);
             this.Controls.Add(this.requestPanel);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "Form1";
             this.Text = "API Tester: final project (Andrei Kazakov)";
             this.requestGroupBox.ResumeLayout(false);

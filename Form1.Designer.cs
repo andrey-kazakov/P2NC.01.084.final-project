@@ -134,11 +134,13 @@
             "OPTIONS",
             "PATCH",
             "POST",
-            "PUT"});
+            "PUT",
+            "TRACE"});
             this.requestMethodComboBox.Location = new System.Drawing.Point(7, 32);
             this.requestMethodComboBox.Name = "requestMethodComboBox";
             this.requestMethodComboBox.Size = new System.Drawing.Size(79, 21);
             this.requestMethodComboBox.TabIndex = 0;
+            this.requestMethodComboBox.SelectedIndexChanged += new System.EventHandler(this.requestMethodComboBox_SelectedIndexChanged);
             // 
             // requestProtocolComboBox
             // 
@@ -158,6 +160,7 @@
             this.requestHostTextBox.Name = "requestHostTextBox";
             this.requestHostTextBox.Size = new System.Drawing.Size(147, 20);
             this.requestHostTextBox.TabIndex = 2;
+            this.requestHostTextBox.TextChanged += new System.EventHandler(this.requestHostTextBox_TextChanged);
             // 
             // requestPathTextBox
             // 
@@ -220,6 +223,7 @@
             this.requestHeadersListBox.Name = "requestHeadersListBox";
             this.requestHeadersListBox.Size = new System.Drawing.Size(756, 95);
             this.requestHeadersListBox.TabIndex = 9;
+            this.requestHeadersListBox.SelectedIndexChanged += new System.EventHandler(this.requestHeadersListBox_SelectedIndexChanged);
             // 
             // requestHeaderLabel
             // 
@@ -261,15 +265,18 @@
             this.requestAddHeaderButton.TabIndex = 14;
             this.requestAddHeaderButton.Text = "Add Header";
             this.requestAddHeaderButton.UseVisualStyleBackColor = true;
+            this.requestAddHeaderButton.Click += new System.EventHandler(this.requestAddHeaderButton_Click);
             // 
             // requestRemoveHeaderButton
             // 
+            this.requestRemoveHeaderButton.Enabled = false;
             this.requestRemoveHeaderButton.Location = new System.Drawing.Point(673, 157);
             this.requestRemoveHeaderButton.Name = "requestRemoveHeaderButton";
             this.requestRemoveHeaderButton.Size = new System.Drawing.Size(75, 23);
             this.requestRemoveHeaderButton.TabIndex = 15;
             this.requestRemoveHeaderButton.Text = "Remove";
             this.requestRemoveHeaderButton.UseVisualStyleBackColor = true;
+            this.requestRemoveHeaderButton.Click += new System.EventHandler(this.requestRemoveHeaderButton_Click);
             // 
             // label1
             // 

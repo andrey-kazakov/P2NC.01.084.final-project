@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
@@ -70,9 +71,10 @@ namespace final_project_AndreiKazakov
         {
             if (getRequestHeaderName().Length < 1 || requestHeaderValueTextBox.Text.Trim().Length < 1)
             {
-                MessageBox.Show("Please input header name and value", "Invalid header", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Header name and value shouldn't be empty", "Invalid header", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
             requestHeaders[getRequestHeaderName()] = requestHeaderValueTextBox.Text.Trim();
 
             requestHeaderTextBox.Text = "";
@@ -98,6 +100,7 @@ namespace final_project_AndreiKazakov
 
         private void updateRequestHeadersForm()
         {
+            requestRemoveHeaderButton.Enabled = false;
             requestHeadersListBox.Items.Clear();
 
             foreach (var header in requestHeaders)
@@ -108,18 +111,36 @@ namespace final_project_AndreiKazakov
 
         private void requestRemoveHeaderButton_Click(object sender, EventArgs e)
         {
-            requestRemoveHeaderButton.Enabled = false;
-            string header = requestHeadersListBox.SelectedItem.ToString().Split(':')[0];
-            requestHeaders.Remove(header);
-            updateRequestHeadersForm();
+            if (requestHeadersListBox.SelectedItem != null)
+            {
+                string header = requestHeadersListBox.SelectedItem.ToString().Split(':')[0];
+                requestHeaders.Remove(header);
+                updateRequestHeadersForm();
+            }
         }
 
         private void requestHeadersListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             requestRemoveHeaderButton.Enabled = requestHeadersListBox.SelectedItem != null;
         }
+
         private void requestRunButton_Click(object sender, EventArgs e)
         {
+            if (requestHostTextBox.Text.Trim().Length < 1 || requestPathTextBox.Text.Trim().Length < 1)
+            {
+                MessageBox.Show("Host and path shouldn't be empty", "Invalid request", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            foreach (var header in requestHeaders)
+            {
+                if (header.Key.StartsWith("Content-") && !isRequestPayloadAllowed())
+                {
+                    MessageBox.Show("Content-* headers are allowed only for POST, PATCH, PUT methods", "Invalid request", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
             Cursor = Cursors.WaitCursor;
             requestRunButton.Enabled = false;
             runRequest();
@@ -134,16 +155,27 @@ namespace final_project_AndreiKazakov
 
             clearResponseForm();
 
-            var request = buildHttpRequestMessage();
-
             Stopwatch timer = new Stopwatch();
             timer.Start();
-            HttpResponseMessage response = await client.SendAsync(request);
-            timer.Stop();
 
-            populateResponseForm(response, timer);
+            try
+            {
+                var request = buildHttpRequestMessage();
 
-            response.Dispose();
+                HttpResponseMessage response = await client.SendAsync(request);
+                timer.Stop();
+
+                populateResponseForm(response, timer);
+
+                response.Dispose();
+            }
+            catch (Exception e)
+            {
+                timer.Stop();
+
+                responseGroupBox.Text = $"Response: Failed, took {timer.ElapsedMilliseconds} ms";
+                responseTextBox.Text = e.ToString();
+            }
         }
 
         private void clearResponseForm()
@@ -156,6 +188,12 @@ namespace final_project_AndreiKazakov
         private async void populateResponseForm(HttpResponseMessage response, Stopwatch timer)
         {
             responseGroupBox.Text = $"Response: {((int)response.StatusCode)} {response.ReasonPhrase}, took {timer.ElapsedMilliseconds} ms";
+
+            foreach (var header in response.Headers)
+            {
+                responseHeadersListBox.Items.Add($"{header.Key}: {string.Join(",", header.Value)}");
+            }
+
             foreach (var header in response.Content.Headers)
             {
                 responseHeadersListBox.Items.Add($"{header.Key}: {string.Join(",", header.Value)}");
@@ -168,7 +206,7 @@ namespace final_project_AndreiKazakov
         {
             HttpRequestMessage request = new HttpRequestMessage(
                 new HttpMethod(requestMethodComboBox.Text),
-                $"{requestProtocolComboBox.Text}{requestHostTextBox.Text}{requestPathTextBox.Text}"
+                $"{requestProtocolComboBox.Text}{requestHostTextBox.Text.Trim()}{requestPathTextBox.Text.Trim()}"
             );
 
             if (isRequestPayloadAllowed())
@@ -178,7 +216,15 @@ namespace final_project_AndreiKazakov
 
             foreach (var header in requestHeaders)
             {
-                request.Headers.Add(header.Key, header.Value);
+                if (header.Key.StartsWith("Content-"))
+                {
+                    request.Content.Headers.Remove(header.Key);
+                    request.Content.Headers.Add(header.Key, header.Value);
+                }
+                else
+                {
+                    request.Headers.Add(header.Key, header.Value);
+                }
             }
 
             return request;

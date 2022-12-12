@@ -297,6 +297,7 @@
             this.requestPayloadTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.requestPayloadTextBox.Size = new System.Drawing.Size(756, 100);
             this.requestPayloadTextBox.TabIndex = 17;
+            this.requestPayloadTextBox.TextChanged += new System.EventHandler(this.requestPayloadTextBox_TextChanged);
             // 
             // Form1
             // 

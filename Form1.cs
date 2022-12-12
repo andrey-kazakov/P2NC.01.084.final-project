@@ -17,6 +17,7 @@ namespace final_project_AndreiKazakov
     public partial class Form1 : Form
     {
         Dictionary<string, string> requestHeaders = new Dictionary<string, string>();
+        const string CONTENT_LENGTH_HEADER = "Content-Length";
         public Form1()
         {
             InitializeComponent();
@@ -28,6 +29,16 @@ namespace final_project_AndreiKazakov
         private void requestMethodComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             requestPayloadTextBox.Enabled = isRequestPayloadAllowed();
+
+            if (isRequestPayloadAllowed())
+            {
+                requestHeaders[CONTENT_LENGTH_HEADER] = requestPayloadTextBox.Text.Length.ToString();
+            }
+            else
+            {
+                requestHeaders.Remove(CONTENT_LENGTH_HEADER);
+            }
+            updateRequestHeadersForm();
         }
 
         private bool isRequestPayloadAllowed()
@@ -43,6 +54,12 @@ namespace final_project_AndreiKazakov
             }
         }
 
+        private void requestPayloadTextBox_TextChanged(object sender, EventArgs e)
+        {
+            requestHeaders[CONTENT_LENGTH_HEADER] = requestPayloadTextBox.Text.Length.ToString();
+            updateRequestHeadersForm();
+        }
+
         private void requestHostTextBox_TextChanged(object sender, EventArgs e)
         {
             requestHeaders["Host"] = requestHostTextBox.Text;
@@ -51,12 +68,32 @@ namespace final_project_AndreiKazakov
 
         private void requestAddHeaderButton_Click(object sender, EventArgs e)
         {
-            requestHeaders[requestHeaderTextBox.Text] = requestHeaderValueTextBox.Text;
+            if (getRequestHeaderName().Length < 1 || requestHeaderValueTextBox.Text.Trim().Length < 1)
+            {
+                MessageBox.Show("Please input header name and value", "Invalid header", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            requestHeaders[getRequestHeaderName()] = requestHeaderValueTextBox.Text.Trim();
 
             requestHeaderTextBox.Text = "";
             requestHeaderValueTextBox.Text = "";
 
             updateRequestHeadersForm();
+        }
+
+        private string getRequestHeaderName()
+        {
+            var parts = requestHeaderTextBox
+                .Text
+                .ToLower()
+                .Split('-')
+                .ToList()
+                .ConvertAll<String>(part => part.Trim())
+                .ToArray()
+                .Where(part => part.Length >= 1);
+
+            return string
+                .Join("-", parts.ToList().ConvertAll<String>(part => part[0].ToString().ToUpper() + part.Substring(1)).ToArray());
         }
 
         private void updateRequestHeadersForm()
